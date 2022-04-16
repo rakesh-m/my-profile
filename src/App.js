@@ -1,6 +1,7 @@
 import './App.css';
 import JobCard from './JobCard';
 import jobData from './jobData'
+import './linkedin.svg'
 
 export default function App() {
 
@@ -21,9 +22,14 @@ export default function App() {
         <div>C++/Web Dev</div>
         <div>Pune, India</div>
       </header>
-      {jobCards}
+      <div className='jobCards'>
+        {jobCards}
+      </div>
       <footer>
         <div>Contact</div>
+        {/* <a target="_blank" href='abc'>
+          <img src='linkedin.svg' alt='LinkedIn'></img>
+        </a> */}
         <div><a href='mailto:rakesh.mhasawade@hotmail.com' className='email'>Email</a></div>
       </footer>
     </div>
