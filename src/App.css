@@ -11,6 +11,7 @@
 }
 
 header {
+  position: sticky;
   background: wheat;
   font-weight: bold;
   display: flex;
