@@ -61,10 +61,11 @@ header div {
 footer {
   width: 100%;
   padding: 2rem;
+  font-weight: bold;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  font-size: 2rem;
+  font-size: 3rem;
   bottom: 0px;
   background: wheat;
   padding: 2rem;

@@ -2,7 +2,8 @@ import './App.css';
 import JobCard from './JobCard';
 import jobData from './jobData'
 import eduData from './eduData'
-import linkedin from './linkedin.svg'
+import linkedin from './images/linkedin.svg'
+import email from './images/email.svg'
 
 export default function App() {
 
@@ -41,18 +42,13 @@ export default function App() {
       </div>
       <footer>
         <div>Contact</div>
-        <a target="_blank" href='abc'>
-          <img src={linkedin} alt='LinkedIn'></img>
+        <a target='_blank' href='https://www.linkedin.com/in/rakesh-mhasawade-268b1816/'>
+          <img src={linkedin} height='20px'></img>
         </a>
-        <div><a href='mailto:rakesh.mhasawade@hotmail.com' className='email'>Email</a></div>
+        <a href='mailto:rakesh.mhasawade@hotmail.com' className='email'>
+          <img src={email} height='20px'></img>
+        </a>
       </footer>
     </div>
   );
 }
-
-{/* <JobCard 
-company='Ubisoft'
-role='Senior Programmer'
-duration='September 2019 - Present'
-tech='C#, Javascript, C++, Test'
-/> */}
