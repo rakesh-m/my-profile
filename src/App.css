@@ -45,11 +45,12 @@ header div {
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
-  flex-basis: 50vw;
+  /* flex-basis: 50vw; */
 }
 
 .company {
   font-size: 3rem;
+  font-weight: bold;
 }
 
 .role {

@@ -2,7 +2,7 @@ import './App.css';
 import JobCard from './JobCard';
 import jobData from './jobData'
 import eduData from './eduData'
-import './linkedin.svg'
+import linkedin from './linkedin.svg'
 
 export default function App() {
 
@@ -41,9 +41,9 @@ export default function App() {
       </div>
       <footer>
         <div>Contact</div>
-        {/* <a target="_blank" href='abc'>
-          <img src='linkedin.svg' alt='LinkedIn'></img>
-        </a> */}
+        <a target="_blank" href='abc'>
+          <img src={linkedin} alt='LinkedIn'></img>
+        </a>
         <div><a href='mailto:rakesh.mhasawade@hotmail.com' className='email'>Email</a></div>
       </footer>
     </div>
