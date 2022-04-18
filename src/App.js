@@ -1,6 +1,7 @@
 import './App.css';
 import JobCard from './JobCard';
 import jobData from './jobData'
+import eduData from './eduData'
 import './linkedin.svg'
 
 export default function App() {
@@ -15,6 +16,16 @@ export default function App() {
       />
   )})
 
+  const eduCards = eduData.map(eduData => {
+    return (
+      <JobCard 
+        company={eduData.company}
+        role={eduData.role}
+        duration={eduData.duration}
+        tech={eduData.tech}
+      />
+  )})
+
   return (
     <div className="App">
       <header>
@@ -24,6 +35,9 @@ export default function App() {
       </header>
       <div className='jobCards'>
         {jobCards}
+      </div>
+      <div className='jobCards'>
+        {eduCards}
       </div>
       <footer>
         <div>Contact</div>

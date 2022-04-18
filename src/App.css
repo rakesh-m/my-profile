@@ -28,17 +28,21 @@ header div {
 .jobCards {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  flex-wrap: nowrap;
 }
 
 .job--card {
-  flex-basis: 300px;
+  /* flex-basis: 300px; */
   font-size: 2rem;
   padding: 10px;
   margin: 10px;
   border: 1px solid grey;
   border-radius: 5px;
   box-shadow: 2px 2px 2px wheat;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 300px;
 }
 
 .company {
