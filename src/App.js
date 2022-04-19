@@ -34,9 +34,11 @@ export default function App() {
         <div>C++/Web Dev</div>
         <div>Pune, India</div>
       </header>
+      <section>Professional Experience</section>
       <div className='jobCards'>
         {jobCards}
       </div>
+      <section>Educational Experience</section>
       <div className='jobCards'>
         {eduCards}
       </div>
