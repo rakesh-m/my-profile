@@ -1,12 +1,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // The profile owner (read access to the visit log).
+    function isOwner() {
+      return request.auth != null &&
+             request.auth.token.email == 'rakesh.cm@gmail.com';
+    }
+
     // Résumé content: any signed-in (Google-authenticated) user may read.
     // Writes are not allowed from the client — content is managed by the
     // project owner via the Firebase console or an admin (privileged) SDK.
     match /resume/{docId} {
       allow read: if request.auth != null;
       allow write: if false;
+    }
+
+    // Visit log: a signed-in user may create only their own visit record.
+    // Only the owner can read the log. No client updates or deletes.
+    match /visits/{visitId} {
+      allow read: if isOwner();
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // Deny everything else by default.

@@ -5,6 +5,7 @@ import {
   signOut as fbSignOut,
 } from 'firebase/auth';
 import { auth, googleProvider, SESSION_MAX_AGE_MS } from './firebase';
+import { logVisit } from './logVisit';
 
 const AuthContext = createContext(null);
 
@@ -25,9 +26,11 @@ export function AuthProvider({ children }) {
   const signInWithGoogle = useCallback(async () => {
     // Always ask the user to select an account so re-auth after expiry is clean.
     googleProvider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(auth, googleProvider);
+    const cred = await signInWithPopup(auth, googleProvider);
     localStorage.setItem(SESSION_KEY, String(Date.now()));
     setExpired(false);
+    // Record this sign-in in the visit log (owner-readable only).
+    logVisit(cred.user);
   }, []);
 
   useEffect(() => {

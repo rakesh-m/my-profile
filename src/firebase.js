@@ -21,3 +21,6 @@ export const googleProvider = new GoogleAuthProvider();
 
 // How long a session is valid before the user must sign in with Google again.
 export const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// The profile owner. Only this account can read the visit log.
+export const OWNER_EMAIL = 'rakesh.cm@gmail.com';
