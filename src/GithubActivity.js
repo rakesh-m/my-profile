@@ -25,6 +25,9 @@ function describeEvent(ev) {
   switch (ev.type) {
     case 'PushEvent': {
       const n = (p.commits && p.commits.length) || p.size || 0;
+      // Some push events arrive with no commit data (e.g. branch-pointer
+      // moves or sparse payloads); avoid the misleading "0 commits".
+      if (!n) return 'Pushed to';
       return `Pushed ${n} commit${n === 1 ? '' : 's'} to`;
     }
     case 'CreateEvent':
