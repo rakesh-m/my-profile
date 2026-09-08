@@ -18,12 +18,12 @@
   font-family: 'Karla', sans-serif;
 }
 
-/* Header with logo + wordmark */
+/* Header: logo + lowercase animated wordmark, left aligned */
 .prajakt-header {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 1.1rem 1.5rem;
+  gap: 0.55rem;
+  padding: 1rem 1.5rem;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid #f3e2cf;
@@ -31,16 +31,42 @@
 }
 
 .prajakt-logo {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
+  flex: none;
   filter: drop-shadow(0 1px 2px rgba(234, 88, 12, 0.25));
 }
 
 .prajakt-title {
+  display: inline-flex;
+  align-items: center;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--coral-dark);
+  /* Keep the header height stable while text length changes. */
+  min-height: 1.6em;
+  line-height: 1;
+}
+
+/* Blinking caret for the typing animation */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  background: var(--coral);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Main content */
@@ -56,22 +82,25 @@
   text-align: center;
   color: #7a6a5c;
   font-size: 1.02rem;
+  line-height: 1.5;
   margin: 0 0 1.75rem;
 }
 
-/* Textarea + clear button */
+/* Auto-growing input: single line by default, expands as content wraps */
 .input-wrap {
   position: relative;
 }
 
 .prajakt-input {
   width: 100%;
-  resize: vertical;
-  min-height: 130px;
-  padding: 1rem 2.4rem 1rem 1rem;
+  display: block;
+  resize: none;
+  overflow: hidden;
+  min-height: 3.2rem;
+  padding: 0.85rem 2.6rem 0.85rem 1rem;
   font-size: 1.15rem;
   font-family: 'Karla', sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--ink);
   background: var(--petal);
   border: 2px solid #f3d9bf;
@@ -92,8 +121,8 @@
 
 .clear-btn {
   position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
+  top: 0.75rem;
+  right: 0.7rem;
   width: 26px;
   height: 26px;
   display: flex;
@@ -202,51 +231,19 @@
   font-size: 0.92rem;
 }
 
-/* Output card */
+/* Output card with floating copy icon */
 .output-card {
+  position: relative;
   margin-top: 1.75rem;
   background: var(--petal);
   border: 2px solid #f3d9bf;
   border-radius: 14px;
   box-shadow: 0 6px 20px rgba(249, 115, 22, 0.1);
-  overflow: hidden;
-}
-
-.output-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 1rem;
-  background: #fff4e8;
-  border-bottom: 1px solid #f3d9bf;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--coral-dark);
-}
-
-.copy-btn {
-  font-family: 'Karla', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.35rem 0.8rem;
-  color: var(--coral-dark);
-  background: #fff;
-  border: 1px solid var(--coral-soft);
-  border-radius: 7px;
-  cursor: pointer;
-}
-
-.copy-btn:hover {
-  background: var(--coral);
-  color: #fff;
-  border-color: var(--coral);
+  padding: 1.1rem 3.2rem 1.1rem 1.1rem;
 }
 
 .output-text {
   margin: 0;
-  padding: 1rem;
   font-size: 1.25rem;
   line-height: 1.7;
   color: var(--ink);
@@ -254,12 +251,41 @@
   word-break: break-word;
 }
 
-/* Footer */
+.copy-icon-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--coral-dark);
+  background: #fff4e8;
+  border: 1px solid var(--coral-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.copy-icon-btn:hover {
+  background: var(--coral);
+  color: #fff;
+}
+
+.copy-icon-btn.copied {
+  background: #e7f6ec;
+  border-color: #9fd8b3;
+  color: #1f8a4c;
+}
+
+/* Footer — themed to match Prajakt */
 .prajakt-footer {
   text-align: center;
   padding: 1.25rem;
-  font-size: 0.85rem;
-  color: #a8917a;
+  font-size: 0.9rem;
+  color: var(--coral-dark);
+  background: rgba(255, 255, 255, 0.7);
   border-top: 1px solid #f3e2cf;
 }
 

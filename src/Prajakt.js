@@ -8,6 +8,19 @@ const SpeechRecognition =
   typeof window !== 'undefined' &&
   (window.SpeechRecognition || window.webkitSpeechRecognition);
 
+// iOS Safari's Web Speech API is unreliable; detect iOS so we can point users
+// at the native keyboard dictation instead.
+const isIOS =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    // iPadOS 13+ reports as Mac; disambiguate by touch support.
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+// Returns true if the text contains any Devanagari characters.
+function hasDevanagari(text) {
+  return /[\u0900-\u097F]/.test(text);
+}
+
 export default function Prajakt() {
   const [text, setText] = useState('');
   const [output, setOutput] = useState('');
@@ -16,6 +29,20 @@ export default function Prajakt() {
   const [listening, setListening] = useState(false);
   const [copied, setCopied] = useState(false);
   const recognitionRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Button label depends on the input script: Devanagari -> correct,
+  // otherwise (Latin / empty) -> transliterate (the default).
+  const mode = hasDevanagari(text) ? 'correct' : 'transliterate';
+  const actionLabel = mode === 'correct' ? 'Correct' : 'Transliterate';
+
+  // Auto-grow the input: single line by default, expands as content wraps.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [text]);
 
   // Set up speech recognition once.
   useEffect(() => {
@@ -30,7 +57,6 @@ export default function Prajakt() {
         .map((r) => r[0].transcript)
         .join(' ')
         .trim();
-      // Append to any existing text so multiple dictations accumulate.
       setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
     };
     recognition.onerror = () => setListening(false);
@@ -58,7 +84,7 @@ export default function Prajakt() {
         recognition.start();
         setListening(true);
       } catch (e) {
-        // start() throws if already started; ignore.
+        /* start() throws if already started; ignore. */
       }
     }
   };
@@ -71,8 +97,8 @@ export default function Prajakt() {
     setOutput('');
     setCopied(false);
     try {
-      const corrected = await correctMarathi(trimmed);
-      setOutput(corrected);
+      const result = await correctMarathi(trimmed);
+      setOutput(result);
     } catch (e) {
       setError('Could not process the text. Please try again.');
     } finally {
@@ -85,6 +111,7 @@ export default function Prajakt() {
     setOutput('');
     setError('');
     setCopied(false);
+    if (inputRef.current) inputRef.current.focus();
   };
 
   const handleCopy = async () => {
@@ -98,25 +125,36 @@ export default function Prajakt() {
     }
   };
 
+  const showMic = SpeechRecognition && !isIOS;
+
   return (
     <div className="prajakt">
       <header className="prajakt-header">
         <img className="prajakt-logo" src={flower} alt="Prajakt flower" />
-        <span className="prajakt-title">Prajakt</span>
+        <AnimatedWordmark />
       </header>
 
       <main className="prajakt-main">
         <p className="prajakt-tagline">
-          Speak or type Marathi, and Prajakt will tidy up the spelling and spacing.
+          Type Marathi in English and Prajakt turns it into Devanagari — or tidies
+          up Marathi you already have.
         </p>
 
         <div className="input-wrap">
           <textarea
+            ref={inputRef}
             className="prajakt-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="इथे मराठी मजकूर लिहा किंवा माइक वापरून बोला…"
-            rows={5}
+            onKeyDown={(e) => {
+              // Enter submits; Shift+Enter inserts a newline.
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+            placeholder="maza nav Rakesh ahe…"
+            rows={1}
             dir="auto"
           />
           {text && (
@@ -132,7 +170,7 @@ export default function Prajakt() {
         </div>
 
         <div className="prajakt-controls">
-          {SpeechRecognition && (
+          {showMic && (
             <button
               className={`mic-btn${listening ? ' listening' : ''}`}
               onClick={toggleMic}
@@ -148,11 +186,16 @@ export default function Prajakt() {
             onClick={handleSubmit}
             disabled={!text.trim() || loading}
           >
-            {loading ? 'Correcting…' : 'Correct'}
+            {loading ? '…' : actionLabel}
           </button>
         </div>
 
-        {!SpeechRecognition && (
+        {isIOS && (
+          <p className="prajakt-hint">
+            On iPhone, tap the mic on your keyboard to dictate into the box.
+          </p>
+        )}
+        {!SpeechRecognition && !isIOS && (
           <p className="prajakt-hint">
             Voice input isn't supported in this browser. Try Chrome for the mic.
           </p>
@@ -162,23 +205,85 @@ export default function Prajakt() {
 
         {output && (
           <div className="output-card">
-            <div className="output-head">
-              <span>Corrected</span>
-              <button className="copy-btn" onClick={handleCopy}>
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
             <p className="output-text" dir="auto">
               {output}
             </p>
+            <button
+              className={`copy-icon-btn${copied ? ' copied' : ''}`}
+              onClick={handleCopy}
+              title={copied ? 'Copied!' : 'Copy'}
+              aria-label="Copy result"
+            >
+              {copied ? <CheckIcon /> : <CopyIcon />}
+            </button>
           </div>
         )}
       </main>
 
       <footer className="prajakt-footer">
-        A little helper for cleaner Marathi text.
+        प्राजक्त — Marathi transliteration, made simple.
       </footer>
     </div>
+  );
+}
+
+// Animated wordmark: types "prajakt", backspaces, then types "प्राजक्त".
+// Replays the full sequence every 60 seconds.
+function AnimatedWordmark() {
+  const EN = 'prajakt';
+  const MR = 'प्राजक्त';
+  const [display, setDisplay] = useState(MR);
+  const timers = useRef([]);
+
+  useEffect(() => {
+    const clearTimers = () => {
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+    };
+
+    const push = (fn, delay) => {
+      timers.current.push(setTimeout(fn, delay));
+    };
+
+    const runSequence = () => {
+      clearTimers();
+      let t = 0;
+      const step = 110; // ms per character
+
+      // Start empty, type "prajakt"
+      setDisplay('');
+      for (let i = 1; i <= EN.length; i += 1) {
+        push(() => setDisplay(EN.slice(0, i)), t);
+        t += step;
+      }
+      // Small pause, then backspace to empty
+      t += 500;
+      for (let i = EN.length - 1; i >= 0; i -= 1) {
+        push(() => setDisplay(EN.slice(0, i)), t);
+        t += step;
+      }
+      // Small pause, then type "प्राजक्त"
+      t += 300;
+      const mrChars = Array.from(MR);
+      for (let i = 1; i <= mrChars.length; i += 1) {
+        push(() => setDisplay(mrChars.slice(0, i).join('')), t);
+        t += step;
+      }
+    };
+
+    runSequence();
+    const interval = setInterval(runSequence, 60000);
+    return () => {
+      clearInterval(interval);
+      clearTimers();
+    };
+  }, []);
+
+  return (
+    <span className="prajakt-title" aria-label="prajakt">
+      {display}
+      <span className="cursor" aria-hidden="true" />
+    </span>
   );
 }
 
@@ -193,6 +298,44 @@ function MicIcon() {
     >
       <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
       <path d="M19 12a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V21a1 1 0 0 0 2 0v-2.08A7 7 0 0 0 19 12z" />
+    </svg>
+  );
+}
+
+// Two overlapping sheets of paper — the familiar "copy" glyph.
+function CopyIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 6 9 17l-5-5" />
     </svg>
   );
 }
