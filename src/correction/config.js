@@ -13,7 +13,7 @@ export const PROVIDER_CONFIG = {
   gemini: {
     apiKey:
       process.env.REACT_APP_GEMINI_API_KEY || 'REPLACE_WITH_GEMINI_API_KEY',
-    model: process.env.REACT_APP_GEMINI_MODEL || 'gemini-2.0-flash',
+    model: process.env.REACT_APP_GEMINI_MODEL || 'gemini-3.6-flash',
   },
   openai: {
     apiKey:
