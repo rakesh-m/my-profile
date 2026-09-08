@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Parijat flower">
+  <g>
+    <!-- Five white petals radiating from the centre -->
+    <g fill="#ffffff" stroke="#f0e6d2" stroke-width="0.6">
+      <ellipse cx="32" cy="14" rx="7.5" ry="12" transform="rotate(0 32 32)"/>
+      <ellipse cx="32" cy="14" rx="7.5" ry="12" transform="rotate(72 32 32)"/>
+      <ellipse cx="32" cy="14" rx="7.5" ry="12" transform="rotate(144 32 32)"/>
+      <ellipse cx="32" cy="14" rx="7.5" ry="12" transform="rotate(216 32 32)"/>
+      <ellipse cx="32" cy="14" rx="7.5" ry="12" transform="rotate(288 32 32)"/>
+    </g>
+    <!-- Orange-coral centre (the signature parijat corolla tube) -->
+    <circle cx="32" cy="32" r="8.5" fill="#f97316"/>
+    <circle cx="32" cy="32" r="4.5" fill="#fb923c"/>
+    <circle cx="32" cy="32" r="1.8" fill="#fff7ed"/>
+  </g>
+</svg>
