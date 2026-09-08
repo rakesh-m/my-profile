@@ -130,8 +130,8 @@ export default function Prajakt() {
   return (
     <div className="prajakt">
       <header className="prajakt-header">
-        <img className="prajakt-logo" src={flower} alt="Prajakt flower" />
         <AnimatedWordmark />
+        <img className="prajakt-logo" src={flower} alt="Prajakt flower" />
       </header>
 
       <main className="prajakt-main">
@@ -232,7 +232,8 @@ export default function Prajakt() {
 function AnimatedWordmark() {
   const EN = 'prajakt';
   const MR = 'प्राजक्त';
-  const [display, setDisplay] = useState(MR);
+  // English is the persisted resting state.
+  const [display, setDisplay] = useState(EN);
   const timers = useRef([]);
 
   useEffect(() => {
@@ -245,33 +246,39 @@ function AnimatedWordmark() {
       timers.current.push(setTimeout(fn, delay));
     };
 
+    // One cycle: from English, backspace, type Marathi, pause, backspace,
+    // retype English — so it always settles back on "prajakt".
     const runSequence = () => {
       clearTimers();
       let t = 0;
       const step = 110; // ms per character
+      const mrChars = Array.from(MR);
 
-      // Start empty, type "prajakt"
-      setDisplay('');
-      for (let i = 1; i <= EN.length; i += 1) {
-        push(() => setDisplay(EN.slice(0, i)), t);
-        t += step;
-      }
-      // Small pause, then backspace to empty
-      t += 500;
+      // Backspace "prajakt" to empty
       for (let i = EN.length - 1; i >= 0; i -= 1) {
         push(() => setDisplay(EN.slice(0, i)), t);
         t += step;
       }
-      // Small pause, then type "प्राजक्त"
+      // Pause, then type "प्राजक्त"
       t += 300;
-      const mrChars = Array.from(MR);
       for (let i = 1; i <= mrChars.length; i += 1) {
         push(() => setDisplay(mrChars.slice(0, i).join('')), t);
         t += step;
       }
+      // Hold Marathi, then backspace to empty
+      t += 900;
+      for (let i = mrChars.length - 1; i >= 0; i -= 1) {
+        push(() => setDisplay(mrChars.slice(0, i).join('')), t);
+        t += step;
+      }
+      // Pause, then retype "prajakt" and rest there
+      t += 300;
+      for (let i = 1; i <= EN.length; i += 1) {
+        push(() => setDisplay(EN.slice(0, i)), t);
+        t += step;
+      }
     };
 
-    runSequence();
     const interval = setInterval(runSequence, 60000);
     return () => {
       clearInterval(interval);
@@ -280,9 +287,11 @@ function AnimatedWordmark() {
   }, []);
 
   return (
-    <span className="prajakt-title" aria-label="prajakt">
-      {display}
-      <span className="cursor" aria-hidden="true" />
+    <span className="prajakt-title">
+      <span className="prajakt-word">
+        {display}
+        <span className="cursor" aria-hidden="true" />
+      </span>
     </span>
   );
 }

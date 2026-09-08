@@ -44,29 +44,25 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--coral-dark);
-  /* Keep the header height stable while text length changes. */
-  min-height: 1.6em;
   line-height: 1;
 }
 
-/* Blinking caret for the typing animation */
+/* Fixed-width word slot so the logo to its right never shifts as the
+   animated text changes length. Text is left-aligned within the slot. */
+.prajakt-word {
+  display: inline-flex;
+  align-items: center;
+  width: 6.5ch;
+  white-space: nowrap;
+}
+
+/* Steady (non-blinking) caret for the typing animation */
 .cursor {
   display: inline-block;
   width: 2px;
   height: 1.1em;
   margin-left: 2px;
   background: var(--coral);
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
 }
 
 /* Main content */
