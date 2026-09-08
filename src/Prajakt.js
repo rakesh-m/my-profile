@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './Prajakt.css';
 import flower from './images/prajakt.svg';
-import { correctMarathi } from './correction';
+import { processText } from './correction';
 
 // Feature-detect the browser Speech Recognition API.
 const SpeechRecognition =
@@ -97,7 +97,7 @@ export default function Prajakt() {
     setOutput('');
     setCopied(false);
     try {
-      const result = await correctMarathi(trimmed);
+      const result = await processText(trimmed);
       setOutput(result);
     } catch (e) {
       setError('Could not process the text. Please try again.');
