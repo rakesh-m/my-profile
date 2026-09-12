@@ -138,6 +138,35 @@
   color: #fff;
 }
 
+/* Quick-append suffix chips */
+.suffix-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.suffix-chip {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.95rem;
+  font-family: 'Karla', sans-serif;
+  color: var(--coral-dark);
+  background: #fff4e8;
+  border: 1px solid var(--coral-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
+}
+
+.suffix-chip:hover {
+  background: var(--coral);
+  color: #fff;
+}
+
+.suffix-chip:active {
+  transform: translateY(1px);
+}
+
 /* Controls row */
 .prajakt-controls {
   display: flex;

@@ -21,6 +21,24 @@ function hasDevanagari(text) {
   return /[\u0900-\u097F]/.test(text);
 }
 
+// Common Marathi suffixes/postpositions, offered as tappable chips since
+// they're fiddly to get right via transliteration. `attach: true` suffixes
+// bind directly onto the previous word (e.g. \u0918\u0930 + \u091A\u093E -> \u0918\u0930\u091A\u093E); the rest are
+// separate postposition words that need a preceding space.
+const SUFFIXES = [
+  { label: '\u091A\u093E', attach: true },
+  { label: '\u091A\u0940', attach: true },
+  { label: '\u091A\u0947', attach: true },
+  { label: '\u0932\u093E', attach: true },
+  { label: '\u0924', attach: true },
+  { label: '\u0939\u0940', attach: true },
+  { label: '\u092E\u0927\u094D\u092F\u0947', attach: false },
+  { label: '\u0938\u093E\u0920\u0940', attach: false },
+  { label: '\u092A\u093E\u0938\u0942\u0928', attach: false },
+  { label: '\u0938\u094B\u092C\u0924', attach: false },
+  { label: '\u0928\u0902\u0924\u0930', attach: false },
+];
+
 export default function Prajakt() {
   const [text, setText] = useState('');
   const [output, setOutput] = useState('');
@@ -106,6 +124,21 @@ export default function Prajakt() {
     }
   };
 
+  const handleSuffixClick = ({ label, attach }) => {
+    setText((prev) => {
+      if (!prev || attach || /\s$/.test(prev)) return `${prev}${label}`;
+      return `${prev} ${label}`;
+    });
+    // Keep focus and caret at the end so chips can be chained.
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    });
+  };
+
   const handleClear = () => {
     setText('');
     setOutput('');
@@ -167,6 +200,20 @@ export default function Prajakt() {
               ✕
             </button>
           )}
+        </div>
+
+        <div className="suffix-chips">
+          {SUFFIXES.map((suffix) => (
+            <button
+              key={suffix.label}
+              type="button"
+              className="suffix-chip"
+              onClick={() => handleSuffixClick(suffix)}
+              aria-label={`Add suffix ${suffix.label}`}
+            >
+              {suffix.label}
+            </button>
+          ))}
         </div>
 
         <div className="prajakt-controls">
