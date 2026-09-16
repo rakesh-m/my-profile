@@ -112,7 +112,7 @@ export const education = [
 export const personalDetails = [
   { label: 'Languages', value: 'English, Hindi, Marathi, French, German' },
   { label: 'Date of Birth', value: 'October 05, 1988' },
-  { label: 'Gender / Marital Status', value: 'Male / Single' },
+  { label: 'Gender', value: 'Male' },
   {
     label: 'Hobbies',
     value: 'Learning languages and reading about current affairs.',
