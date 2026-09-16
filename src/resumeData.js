@@ -3,7 +3,6 @@
 export const profile = {
   name: 'Rakesh Mhasawade',
   location: 'Pune, India',
-  phone: '+91-7798977343',
   email: 'rakesh.mhasawade@hotmail.com',
   linkedin: 'https://www.linkedin.com/in/rakesh-mhasawade-268b1816/',
   github: 'https://github.com/rakesh-m',
@@ -111,11 +110,6 @@ export const education = [
 ];
 
 export const personalDetails = [
-  {
-    label: 'Current and Permanent Address',
-    value:
-      '32/3, Sector 25, L.I.G. Colony, Pradhikaran Marg, Nigdi, Pune – 411 044, Maharashtra, India.',
-  },
   { label: 'Languages', value: 'English, Hindi, Marathi, French, German' },
   { label: 'Date of Birth', value: 'October 05, 1988' },
   { label: 'Gender / Marital Status', value: 'Male / Single' },

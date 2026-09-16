@@ -69,10 +69,7 @@ export default function Profile() {
         <div className="name">{profile.name}</div>
         <div className="header-right">
           <div className="contact">
-            {profile.location} &nbsp;|&nbsp;{' '}
-            <a href={`tel:${profile.phone.replace(/[^+\d]/g, '')}`}>
-              {profile.phone}
-            </a>
+            {profile.location}
             <br />
             <a href={`mailto:${profile.email}`}>{profile.email}</a>
           </div>
