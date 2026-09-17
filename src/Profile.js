@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import './App.css';
 import { db } from './firebase';
-import { useAuth } from './AuthContext';
 import ExperienceBlock from './ExperienceBlock';
 import GithubActivity from './GithubActivity';
 import linkedin from './images/linkedin.svg';
@@ -24,7 +23,6 @@ const seedContent = {
 };
 
 export default function Profile() {
-  const { user, signOut } = useAuth();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,15 +65,10 @@ export default function Profile() {
     <div className="App">
       <header>
         <div className="name">{profile.name}</div>
-        <div className="header-right">
-          <div className="contact">
-            {profile.location}
-            <br />
-            <a href={`mailto:${profile.email}`}>{profile.email}</a>
-          </div>
-          <button className="signout-btn" onClick={signOut} title={user?.email}>
-            Sign out
-          </button>
+        <div className="contact">
+          {profile.location}
+          <br />
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
         </div>
       </header>
 
