@@ -46,8 +46,13 @@ export default function Prajakt() {
   const [error, setError] = useState('');
   const [listening, setListening] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedWordIndex, setSelectedWordIndex] = useState(null);
   const recognitionRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Words shown as clickable chips below the textbox, split from whatever
+  // has been typed so far.
+  const words = text.trim() ? text.trim().split(/\s+/) : [];
 
   // Button label depends on the input script: Devanagari -> correct,
   // otherwise (Latin / empty) -> transliterate (the default).
@@ -124,10 +129,23 @@ export default function Prajakt() {
     }
   };
 
+  // Applies a suffix chip to the selected word (or the last word if none is
+  // selected). `attach` suffixes merge directly onto that word; the rest are
+  // inserted as their own postposition word right after it.
   const handleSuffixClick = ({ label, attach }) => {
     setText((prev) => {
-      if (!prev || attach || /\s$/.test(prev)) return `${prev}${label}`;
-      return `${prev} ${label}`;
+      const prevWords = prev.trim() ? prev.trim().split(/\s+/) : [];
+      if (prevWords.length === 0) return label;
+      const targetIndex =
+        selectedWordIndex !== null && selectedWordIndex < prevWords.length
+          ? selectedWordIndex
+          : prevWords.length - 1;
+      if (attach) {
+        prevWords[targetIndex] = `${prevWords[targetIndex]}${label}`;
+      } else {
+        prevWords.splice(targetIndex + 1, 0, label);
+      }
+      return prevWords.join(' ');
     });
     // Keep focus and caret at the end so chips can be chained.
     requestAnimationFrame(() => {
@@ -139,11 +157,17 @@ export default function Prajakt() {
     });
   };
 
+  // Selecting a word again deselects it, falling back to "apply to last word".
+  const handleWordClick = (index) => {
+    setSelectedWordIndex((prev) => (prev === index ? null : index));
+  };
+
   const handleClear = () => {
     setText('');
     setOutput('');
     setError('');
     setCopied(false);
+    setSelectedWordIndex(null);
     if (inputRef.current) inputRef.current.focus();
   };
 
@@ -178,7 +202,10 @@ export default function Prajakt() {
             ref={inputRef}
             className="prajakt-input"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              setSelectedWordIndex(null);
+            }}
             onKeyDown={(e) => {
               // Enter submits; Shift+Enter inserts a newline.
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -186,7 +213,7 @@ export default function Prajakt() {
                 handleSubmit();
               }
             }}
-            placeholder="maza nav Rakesh ahe…"
+            placeholder="माझं नाव राकेश आहे…"
             rows={1}
             dir="auto"
           />
@@ -201,6 +228,24 @@ export default function Prajakt() {
             </button>
           )}
         </div>
+
+        {words.length > 0 && (
+          <div className="word-row">
+            {words.map((word, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`word-chip${
+                  selectedWordIndex === i ? ' selected' : ''
+                }`}
+                onClick={() => handleWordClick(i)}
+                aria-pressed={selectedWordIndex === i}
+              >
+                {word}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="suffix-chips">
           {SUFFIXES.map((suffix) => (

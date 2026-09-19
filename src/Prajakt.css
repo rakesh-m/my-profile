@@ -138,6 +138,36 @@
   color: #fff;
 }
 
+/* Second row: the typed text broken into clickable, selectable words */
+.word-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.word-chip {
+  padding: 0.3rem 0.7rem;
+  font-size: 1rem;
+  font-family: 'Karla', sans-serif;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #f3d9bf;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.word-chip:hover {
+  border-color: var(--coral-soft);
+}
+
+.word-chip.selected {
+  background: var(--coral-dark);
+  color: #fff;
+  border-color: var(--coral-dark);
+}
+
 /* Quick-append suffix chips */
 .suffix-chips {
   display: flex;
