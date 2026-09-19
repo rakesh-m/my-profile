@@ -39,6 +39,32 @@ const SUFFIXES = [
   { label: '\u0928\u0902\u0924\u0930', attach: false },
 ];
 
+// Some words change shape when a suffix attaches instead of just taking it
+// on the end (e.g. "\u092A\u0941\u0923\u0947" + "\u091A\u0947" -> "\u092A\u0941\u0923\u094D\u092F\u093E\u091A\u0947", not "\u092A\u0941\u0923\u0947\u091A\u0947"). Keyed by the
+// base word lowercased, covering both the Latin and Devanagari spellings a
+// user might type; each value maps a suffix label to the full result.
+// Add more entries here as they're needed.
+const IRREGULAR_SUFFIX_WORDS = {
+  pune: { '\u091A\u0947': 'punyache' },
+  '\u092A\u0941\u0923\u0947': { '\u091A\u0947': '\u092A\u0941\u0923\u094D\u092F\u093E\u091A\u0947' },
+};
+
+// Applies an "attach" suffix onto a word, using the irregular ruleset when
+// the word is known to change shape, otherwise plain concatenation.
+function applyAttachSuffix(word, suffixLabel) {
+  const rule = IRREGULAR_SUFFIX_WORDS[word.toLowerCase()];
+  const override = rule && rule[suffixLabel];
+  if (!override) return `${word}${suffixLabel}`;
+  const firstChar = word.charAt(0);
+  const isCapitalized =
+    firstChar &&
+    firstChar === firstChar.toUpperCase() &&
+    firstChar !== firstChar.toLowerCase();
+  return isCapitalized
+    ? override.charAt(0).toUpperCase() + override.slice(1)
+    : override;
+}
+
 export default function Prajakt() {
   const [text, setText] = useState('');
   const [output, setOutput] = useState('');
@@ -141,7 +167,10 @@ export default function Prajakt() {
           ? selectedWordIndex
           : prevWords.length - 1;
       if (attach) {
-        prevWords[targetIndex] = `${prevWords[targetIndex]}${label}`;
+        prevWords[targetIndex] = applyAttachSuffix(
+          prevWords[targetIndex],
+          label
+        );
       } else {
         prevWords.splice(targetIndex + 1, 0, label);
       }
@@ -193,8 +222,8 @@ export default function Prajakt() {
 
       <main className="prajakt-main">
         <p className="prajakt-tagline">
-          Type Marathi in English and Prajakt turns it into Devanagari — or tidies
-          up Marathi you already have.
+          Write in Marathi, tap suffix chips to shape each word, and Prajakt
+          tidies it up into clean Devanagari.
         </p>
 
         <div className="input-wrap">
@@ -213,7 +242,7 @@ export default function Prajakt() {
                 handleSubmit();
               }
             }}
-            placeholder="माझं नाव राकेश आहे…"
+            placeholder="काहीतरी मराठीमध्ये लिहा…"
             rows={1}
             dir="auto"
           />
