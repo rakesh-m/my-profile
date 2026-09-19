@@ -108,13 +108,3 @@ export const education = [
     score: '326 / 400',
   },
 ];
-
-export const personalDetails = [
-  { label: 'Languages', value: 'English, Hindi, Marathi, French, German' },
-  { label: 'Date of Birth', value: 'October 05, 1988' },
-  { label: 'Gender', value: 'Male' },
-  {
-    label: 'Hobbies',
-    value: 'Learning languages and reading about current affairs.',
-  },
-];

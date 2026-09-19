@@ -33,7 +33,6 @@ function loadSeed() {
     'relevantExperience',
     'pastWork',
     'education',
-    'personalDetails',
   ];
   const transformed =
     src.replace(/export\s+const/g, 'const') +
@@ -136,7 +135,6 @@ async function main() {
     relevantExperience: seed.relevantExperience,
     pastWork: seed.pastWork,
     education: seed.education,
-    personalDetails: seed.personalDetails,
   };
 
   const refreshToken = readRefreshToken();

@@ -154,22 +154,6 @@ th {
   font-weight: bold;
 }
 
-/* ---------- Personal details ---------- */
-.details-grid {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.details-row {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 1rem;
-}
-
-.details-row .label {
-  font-weight: 600;
-}
-
 /* ---------- Footer ---------- */
 footer {
   width: 100%;
@@ -195,8 +179,7 @@ footer a {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
-  .job-grid,
-  .details-row {
+  .job-grid {
     grid-template-columns: 1fr;
   }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import './Prajakt.css';
 import flower from './images/prajakt.svg';
 import { processText } from './correction';
+import { transliterateRomanized } from './correction/transliterate';
 
 // Feature-detect the browser Speech Recognition API.
 const SpeechRecognition =
@@ -39,6 +40,46 @@ const SUFFIXES = [
   { label: '\u0928\u0902\u0924\u0930', attach: false },
 ];
 
+// Some words change shape when a suffix attaches instead of just taking it
+// on the end (e.g. "\u092A\u0941\u0923\u0947" + "\u091A\u0947" -> "\u092A\u0941\u0923\u094D\u092F\u093E\u091A\u0947", not "\u092A\u0941\u0923\u0947\u091A\u0947"). Keyed by the
+// base word lowercased, covering both the Latin and Devanagari spellings a
+// user might type; each value maps a suffix label to the full result.
+// Add more entries here as they're needed.
+const IRREGULAR_SUFFIX_WORDS = {
+  pune: { '\u091A\u0947': 'punyache' },
+  '\u092A\u0941\u0923\u0947': { '\u091A\u0947': '\u092A\u0941\u0923\u094D\u092F\u093E\u091A\u0947' },
+};
+
+// Carries the capitalization of `source`'s first letter over onto `target`
+// (Devanagari has no case, so this only has an effect on Latin script).
+function capitalizeLike(source, target) {
+  const firstChar = source.charAt(0);
+  const isCapitalized =
+    firstChar &&
+    firstChar === firstChar.toUpperCase() &&
+    firstChar !== firstChar.toLowerCase();
+  return isCapitalized
+    ? target.charAt(0).toUpperCase() + target.slice(1)
+    : target;
+}
+
+// Applies an "attach" suffix onto a word, producing a full Devanagari result:
+// - a known irregular word (e.g. Pune) uses its ruleset override;
+// - a word already in Devanagari just takes the suffix on the end;
+// - a romanized word is transliterated first, so the suffix always lands on
+//   proper Devanagari rather than being tacked onto Latin script.
+async function applyAttachSuffix(word, suffixLabel) {
+  const rule = IRREGULAR_SUFFIX_WORDS[word.toLowerCase()];
+  const override = rule && rule[suffixLabel];
+  if (override) return capitalizeLike(word, override);
+
+  if (hasDevanagari(word)) return `${word}${suffixLabel}`;
+
+  const converted = await transliterateRomanized(word);
+  if (!converted) return `${word}${suffixLabel}`;
+  return `${converted}${suffixLabel}`;
+}
+
 export default function Prajakt() {
   const [text, setText] = useState('');
   const [output, setOutput] = useState('');
@@ -46,12 +87,29 @@ export default function Prajakt() {
   const [error, setError] = useState('');
   const [listening, setListening] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedWordIndex, setSelectedWordIndex] = useState(null);
+  const [suffixBusy, setSuffixBusy] = useState(false);
+  // The second row: the words the user builds with suffix chips. Kept
+  // separate from `text` (the textbox), which always stays exactly what was
+  // typed there. Suffix clicks only ever change this array.
+  const [secondRowWords, setSecondRowWords] = useState([]);
   const recognitionRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Button label depends on the input script: Devanagari -> correct,
+  // The textbox is source of truth for what's typed; any change to it
+  // re-mirrors the second row from scratch, discarding prior suffix work.
+  useEffect(() => {
+    setSecondRowWords(text.trim() ? text.trim().split(/\s+/) : []);
+    setSelectedWordIndex(null);
+  }, [text]);
+
+  // What actually gets processed is the shaped second row, since that's
+  // where suffix chips land.
+  const combinedText = secondRowWords.join(' ');
+
+  // Button label depends on the shaped text's script: Devanagari -> correct,
   // otherwise (Latin / empty) -> transliterate (the default).
-  const mode = hasDevanagari(text) ? 'correct' : 'transliterate';
+  const mode = hasDevanagari(combinedText) ? 'correct' : 'transliterate';
   const actionLabel = mode === 'correct' ? 'Correct' : 'Transliterate';
 
   // Auto-grow the input: single line by default, expands as content wraps.
@@ -108,7 +166,7 @@ export default function Prajakt() {
   };
 
   const handleSubmit = async () => {
-    const trimmed = text.trim();
+    const trimmed = combinedText.trim();
     if (!trimmed || loading) return;
     setLoading(true);
     setError('');
@@ -124,19 +182,47 @@ export default function Prajakt() {
     }
   };
 
-  const handleSuffixClick = ({ label, attach }) => {
-    setText((prev) => {
-      if (!prev || attach || /\s$/.test(prev)) return `${prev}${label}`;
-      return `${prev} ${label}`;
-    });
-    // Keep focus and caret at the end so chips can be chained.
-    requestAnimationFrame(() => {
-      const el = inputRef.current;
-      if (!el) return;
-      el.focus();
-      const len = el.value.length;
-      el.setSelectionRange(len, len);
-    });
+  // Applies a suffix chip to the selected word (or the last word if none is
+  // selected) in the second row — the textbox itself is never touched.
+  // `attach` suffixes merge directly onto that word (transliterating it to
+  // Devanagari first if needed); the rest are inserted as their own
+  // postposition word right after it.
+  const handleSuffixClick = async ({ label, attach }) => {
+    if (secondRowWords.length === 0 || suffixBusy) return;
+    const targetIndex =
+      selectedWordIndex !== null && selectedWordIndex < secondRowWords.length
+        ? selectedWordIndex
+        : secondRowWords.length - 1;
+
+    if (!attach) {
+      setSecondRowWords((prev) => {
+        const words = [...prev];
+        words.splice(targetIndex + 1, 0, label);
+        return words;
+      });
+      return;
+    }
+
+    const baseWord = secondRowWords[targetIndex];
+    setSuffixBusy(true);
+    try {
+      const shaped = await applyAttachSuffix(baseWord, label);
+      setSecondRowWords((prev) => {
+        // Bail if the target word changed while the transliteration call
+        // was in flight (e.g. the textbox was edited).
+        if (prev[targetIndex] !== baseWord) return prev;
+        const words = [...prev];
+        words[targetIndex] = shaped;
+        return words;
+      });
+    } finally {
+      setSuffixBusy(false);
+    }
+  };
+
+  // Selecting a word again deselects it, falling back to "apply to last word".
+  const handleWordClick = (index) => {
+    setSelectedWordIndex((prev) => (prev === index ? null : index));
   };
 
   const handleClear = () => {
@@ -169,8 +255,8 @@ export default function Prajakt() {
 
       <main className="prajakt-main">
         <p className="prajakt-tagline">
-          Type Marathi in English and Prajakt turns it into Devanagari — or tidies
-          up Marathi you already have.
+          Write in Marathi, tap suffix chips to shape each word, and Prajakt
+          tidies it up into clean Devanagari.
         </p>
 
         <div className="input-wrap">
@@ -186,7 +272,7 @@ export default function Prajakt() {
                 handleSubmit();
               }
             }}
-            placeholder="maza nav Rakesh ahe…"
+            placeholder="काहीतरी मराठीमध्ये लिहा…"
             rows={1}
             dir="auto"
           />
@@ -202,6 +288,24 @@ export default function Prajakt() {
           )}
         </div>
 
+        {secondRowWords.length > 0 && (
+          <div className="word-row">
+            {secondRowWords.map((word, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`word-chip${
+                  selectedWordIndex === i ? ' selected' : ''
+                }`}
+                onClick={() => handleWordClick(i)}
+                aria-pressed={selectedWordIndex === i}
+              >
+                {word}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="suffix-chips">
           {SUFFIXES.map((suffix) => (
             <button
@@ -209,6 +313,7 @@ export default function Prajakt() {
               type="button"
               className="suffix-chip"
               onClick={() => handleSuffixClick(suffix)}
+              disabled={suffixBusy}
               aria-label={`Add suffix ${suffix.label}`}
             >
               {suffix.label}
@@ -231,7 +336,7 @@ export default function Prajakt() {
           <button
             className="submit-btn"
             onClick={handleSubmit}
-            disabled={!text.trim() || loading}
+            disabled={!combinedText.trim() || loading}
           >
             {loading ? '…' : actionLabel}
           </button>
