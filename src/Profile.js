@@ -18,7 +18,6 @@ const seedContent = {
   relevantExperience: seed.relevantExperience,
   pastWork: seed.pastWork,
   education: seed.education,
-  personalDetails: seed.personalDetails,
 };
 
 export default function Profile() {
@@ -57,7 +56,6 @@ export default function Profile() {
     relevantExperience,
     pastWork,
     education,
-    personalDetails,
   } = content;
 
   return (
@@ -142,18 +140,6 @@ export default function Profile() {
               ))}
             </tbody>
           </table>
-        </section>
-
-        <section>
-          <h2>Personal Details</h2>
-          <div className="details-grid">
-            {personalDetails.map((row, i) => (
-              <div className="details-row" key={i}>
-                <div className="label">{row.label}</div>
-                <div className="value">{row.value}</div>
-              </div>
-            ))}
-          </div>
         </section>
       </main>
 
