@@ -3,7 +3,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import './App.css';
 import { db } from './firebase';
 import ExperienceBlock from './ExperienceBlock';
-import GithubActivity from './GithubActivity';
 import linkedin from './images/linkedin.svg';
 import email from './images/email.svg';
 import github from './images/github.svg';
@@ -144,10 +143,6 @@ export default function Profile() {
             </tbody>
           </table>
         </section>
-
-        <GithubActivity
-          username={(profile.github || '').replace(/\/+$/, '').split('/').pop()}
-        />
 
         <section>
           <h2>Personal Details</h2>
