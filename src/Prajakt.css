@@ -197,6 +197,11 @@
   transform: translateY(1px);
 }
 
+.suffix-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* Controls row */
 .prajakt-controls {
   display: flex;
