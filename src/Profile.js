@@ -3,6 +3,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import './App.css';
 import { db } from './firebase';
 import ExperienceBlock from './ExperienceBlock';
+import CollapsibleRows from './CollapsibleRows';
 import linkedin from './images/linkedin.svg';
 import email from './images/email.svg';
 import github from './images/github.svg';
@@ -96,50 +97,26 @@ export default function Profile() {
 
         <section>
           <h2>Other Past Work Experience Summary</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Organization</th>
-                <th>From - To</th>
-                <th>Designation</th>
-                <th>Summary</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pastWork.map((row, i) => (
-                <tr key={i}>
-                  <td>{row.organization}</td>
-                  <td>{row.duration}</td>
-                  <td>{row.designation}</td>
-                  <td>{row.summary}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <CollapsibleRows
+            items={pastWork}
+            renderSummary={(row) => `${row.organization} · ${row.duration}`}
+            fields={[
+              { key: 'designation', label: 'Designation' },
+              { key: 'summary', label: 'Summary' },
+            ]}
+          />
         </section>
 
         <section>
           <h2>Education and Certifications</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Degree</th>
-                <th>University / Institution</th>
-                <th>Passing year</th>
-                <th>Class / Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {education.map((row, i) => (
-                <tr key={i}>
-                  <td>{row.degree}</td>
-                  <td>{row.institution}</td>
-                  <td>{row.year}</td>
-                  <td>{row.score}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <CollapsibleRows
+            items={education}
+            renderSummary={(row) => `${row.degree} · ${row.year}`}
+            fields={[
+              { key: 'institution', label: 'University / Institution' },
+              { key: 'score', label: 'Class / Score' },
+            ]}
+          />
         </section>
       </main>
 

@@ -134,6 +134,64 @@ ul.strengths li {
   margin-bottom: 0.4rem;
 }
 
+/* ---------- Collapsible rows ---------- */
+.collapsible-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.collapsible-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.collapsible-item summary {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  font-weight: bold;
+  list-style: none;
+}
+
+.collapsible-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-item summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5rem;
+  transition: transform 0.15s ease;
+}
+
+.collapsible-item[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.collapsible-body {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.collapsible-field {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.collapsible-field:last-child {
+  margin-bottom: 0;
+}
+
+.collapsible-field .label {
+  font-style: italic;
+  text-decoration: underline;
+  color: #333;
+}
+
 /* ---------- Tables ---------- */
 table {
   width: 100%;
@@ -185,6 +243,10 @@ footer a {
 
   .job-grid .label {
     margin-top: 0.5rem;
+  }
+
+  .collapsible-field {
+    grid-template-columns: 1fr;
   }
 
   header .contact {
