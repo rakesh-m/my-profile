@@ -19,17 +19,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: rakesh-profile-85519
-          channelId: live
-
       - name: Write Firebase service account key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${{ runner.temp }}/firebase-service-account.json"
 
-      - name: Deploy Firestore rules and indexes
-        run: npx firebase-tools deploy --only firestore --project rakesh-profile-85519 --non-interactive
+      - name: Deploy Hosting (profile + yasna) and Firestore
+        run: npx firebase-tools deploy --only hosting,firestore --project rakesh-profile-85519 --non-interactive
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
