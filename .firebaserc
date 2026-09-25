@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "rakesh-profile-85519"
+  },
+  "targets": {
+    "rakesh-profile-85519": {
+      "hosting": {
+        "profile": [
+          "rakesh-profile-85519"
+        ],
+        "yasna": [
+          "rakesh-m-yasna"
+        ]
+      }
+    }
   }
 }
